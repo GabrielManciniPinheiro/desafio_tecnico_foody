@@ -18,6 +18,7 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -64,6 +65,9 @@ public class Order {
     @Column(nullable = false)
     private Instant updatedAt;
 
+    @Version
+    private long version;
+
     protected Order() {
     }
 
@@ -80,6 +84,13 @@ public class Order {
         OrderItem item = new OrderItem(this, productName, quantity, unitPrice);
         items.add(item);
         totalAmount = totalAmount.add(item.getSubtotal());
+    }
+
+    public void changeStatus(OrderStatus newStatus) {
+        if (!status.canTransitionTo(newStatus)) {
+            throw new InvalidStatusTransitionException(status, newStatus);
+        }
+        status = newStatus;
     }
 
     @PrePersist

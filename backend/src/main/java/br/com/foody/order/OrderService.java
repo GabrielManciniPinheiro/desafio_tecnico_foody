@@ -40,8 +40,22 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderResponse findById(Long id) {
+        return OrderResponse.from(getOrder(id));
+    }
+
+    @Transactional
+    public OrderResponse updateStatus(Long id, OrderStatus newStatus) {
+        Order order = getOrder(id);
+        order.changeStatus(newStatus);
+
+        // flush antecipado: atualiza updatedAt/version antes de montar a resposta
+        // e faz um eventual conflito de concorrência estourar aqui dentro
+        orderRepository.flush();
+        return OrderResponse.from(order);
+    }
+
+    private Order getOrder(Long id) {
         return orderRepository.findByIdWithItems(id)
-                .map(OrderResponse::from)
                 .orElseThrow(() -> new OrderNotFoundException(id));
     }
 }

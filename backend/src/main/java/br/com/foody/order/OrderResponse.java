@@ -3,6 +3,7 @@ package br.com.foody.order;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 public record OrderResponse(
         Long id,
@@ -10,6 +11,7 @@ public record OrderResponse(
         String customerPhone,
         Address deliveryAddress,
         OrderStatus status,
+        Set<OrderStatus> nextStatuses,
         BigDecimal totalAmount,
         List<Item> items,
         Instant createdAt,
@@ -31,6 +33,7 @@ public record OrderResponse(
                 new Address(address.getStreet(), address.getNumber(), address.getComplement(),
                         address.getNeighborhood(), address.getCity(), address.getState(), address.getZipCode()),
                 order.getStatus(),
+                order.getStatus().nextStatuses(),
                 order.getTotalAmount(),
                 order.getItems().stream()
                         .map(item -> new Item(item.getId(), item.getProductName(), item.getQuantity(),

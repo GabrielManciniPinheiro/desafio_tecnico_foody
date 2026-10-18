@@ -15,7 +15,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -67,6 +69,7 @@ class OrderControllerIntegrationTest {
         MvcResult result = createOrder(VALID_ORDER)
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("RECEBIDO"))
+                .andExpect(jsonPath("$.nextStatuses", contains("EM_PREPARO", "CANCELADO")))
                 .andExpect(jsonPath("$.totalAmount").value(103.80))
                 .andExpect(jsonPath("$.deliveryAddress.state").value("SP"))
                 .andExpect(jsonPath("$.deliveryAddress.zipCode").value("01000-000"))
@@ -148,6 +151,78 @@ class OrderControllerIntegrationTest {
     }
 
     @Test
+    void shouldMoveOrderThroughTheDeliveryFlow() throws Exception {
+        Integer id = createdOrderId();
+
+        updateStatus(id, "EM_PREPARO")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("EM_PREPARO"))
+                .andExpect(jsonPath("$.nextStatuses", contains("SAIU_PARA_ENTREGA", "CANCELADO")));
+        updateStatus(id, "SAIU_PARA_ENTREGA")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nextStatuses", contains("ENTREGUE")));
+        updateStatus(id, "ENTREGUE")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ENTREGUE"))
+                .andExpect(jsonPath("$.nextStatuses").isEmpty());
+
+        mockMvc.perform(get("/api/orders/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer()))
+                .andExpect(jsonPath("$.status").value("ENTREGUE"));
+    }
+
+    @Test
+    void shouldCancelOrderBeforeDispatch() throws Exception {
+        Integer id = createdOrderId();
+
+        updateStatus(id, "CANCELADO")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELADO"))
+                .andExpect(jsonPath("$.nextStatuses").isEmpty());
+    }
+
+    @Test
+    void shouldRejectTransitionOutsideTheFlow() throws Exception {
+        Integer id = createdOrderId();
+
+        updateStatus(id, "ENTREGUE")
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value("Não é possível alterar o status do pedido de RECEBIDO para ENTREGUE."));
+    }
+
+    @Test
+    void shouldNotCancelOrderAfterDispatch() throws Exception {
+        Integer id = createdOrderId();
+        updateStatus(id, "EM_PREPARO").andExpect(status().isOk());
+        updateStatus(id, "SAIU_PARA_ENTREGA").andExpect(status().isOk());
+
+        updateStatus(id, "CANCELADO")
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value("Não é possível alterar o status do pedido de SAIU_PARA_ENTREGA para CANCELADO."));
+    }
+
+    @Test
+    void shouldValidateStatusPayload() throws Exception {
+        Integer id = createdOrderId();
+
+        mockMvc.perform(patch("/api/orders/{id}/status", id)
+                        .header(HttpHeaders.AUTHORIZATION, bearer())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.status").value("Informe o novo status."));
+
+        updateStatus(id, "INEXISTENTE")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Corpo da requisição inválido ou mal formatado."));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenUpdatingUnknownOrder() throws Exception {
+        updateStatus(999999, "EM_PREPARO")
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void shouldRequireAuthentication() throws Exception {
         mockMvc.perform(get("/api/orders"))
                 .andExpect(status().isUnauthorized());
@@ -161,6 +236,22 @@ class OrderControllerIntegrationTest {
                 .header(HttpHeaders.AUTHORIZATION, bearer())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body));
+    }
+
+    private Integer createdOrderId() throws Exception {
+        String response = createOrder(VALID_ORDER)
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        return JsonPath.read(response, "$.id");
+    }
+
+    private ResultActions updateStatus(Integer id, String status) throws Exception {
+        return mockMvc.perform(patch("/api/orders/{id}/status", id)
+                .header(HttpHeaders.AUTHORIZATION, bearer())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"status": "%s"}
+                        """.formatted(status)));
     }
 
     private String bearer() {
