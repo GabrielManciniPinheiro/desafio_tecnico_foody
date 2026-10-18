@@ -1,0 +1,13 @@
+# Variáveis de ambiente (credenciais do banco, segredo do JWT)
+.env
+.env.*
+!.env.example
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editores
+.idea/
+.vscode/
+*.iml
