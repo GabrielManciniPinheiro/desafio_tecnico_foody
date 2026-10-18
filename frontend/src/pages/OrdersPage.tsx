@@ -4,6 +4,7 @@ import { ErrorAlert } from '../components/Alert'
 import { Button } from '../components/Button'
 import { buttonClasses } from '../components/button-styles'
 import { OrderCard } from '../orders/OrderCard'
+import { OrderSearch } from '../orders/OrderSearch'
 import { useOrders } from '../orders/queries'
 import { statusLabels } from '../orders/status'
 import { StatusFilter } from '../orders/StatusFilter'
@@ -32,14 +33,17 @@ export function OrdersPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Pedidos</h1>
           <p className="mt-1 text-sm text-slate-500">Acompanhe e atualize o status dos pedidos.</p>
         </div>
-        <Link to="/pedidos/novo" className={buttonClasses('primary')}>
-          Novo pedido
-        </Link>
+        <div className="flex w-full flex-wrap items-start gap-3 sm:w-auto">
+          <OrderSearch />
+          <Link to="/pedidos/novo" className={buttonClasses('primary')}>
+            Novo pedido
+          </Link>
+        </div>
       </div>
 
       <StatusFilter

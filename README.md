@@ -16,7 +16,7 @@ Sistema de gestão de pedidos de delivery: API REST em **Java 21 + Spring Boot 4
 - **Autenticação:** cadastro (nome, e-mail e senha) e login com e-mail e senha. Todas as rotas, exceto cadastro e login, exigem token JWT.
 - **Pedidos:** criação com cliente, endereço de entrega e itens; listagem; busca por ID.
 - **Status:** atualização seguindo o fluxo `RECEBIDO → EM_PREPARO → SAIU_PARA_ENTREGA → ENTREGUE`, com cancelamento permitido antes da saída para entrega.
-- **Front-end:** lista de pedidos com filtro por status, formulário de novo pedido com total em tempo real e preenchimento do endereço pelo CEP, página de detalhe e botões para avançar o status.
+- **Front-end:** lista de pedidos com filtro por status, busca de pedido pelo número, formulário de novo pedido com total em tempo real e preenchimento do endereço pelo CEP, página de detalhe e botões para avançar o status.
 
 ## Stack
 
@@ -88,7 +88,7 @@ de `/api` para `http://localhost:8080`, então não é preciso configurar nada.
 
 ```bash
 cd backend && ./mvnw test     # 53 testes: unitários, integração dos endpoints e persistência
-cd frontend && npm test       # 15 testes da lógica do formulário de pedido
+cd frontend && npm test       # 27 testes da lógica do formulário de pedido e da busca por ID
 ```
 
 ## API
@@ -293,6 +293,7 @@ erDiagram
 
 **Frontend**
 - **TanStack Query** para cache, estados de carregamento e erro, e sincronização. A lista se atualiza a cada 30 segundos, e a resposta da mudança de status atualiza o cache sem uma nova busca.
+- **Busca por número usando `GET /api/orders/{id}`:** a busca e a página de detalhe compartilham a mesma chave de cache, então o detalhe abre sem uma segunda requisição. Um número inexistente mostra o aviso na própria lista.
 - **Formulário espelhando o JSON da API:** os erros devolvidos pelo servidor aparecem diretamente no campo correspondente.
 - **Total calculado em centavos** no front-end, para evitar erros de ponto flutuante (`0,10 × 3 = 0,30`).
 - **Sessão em `localStorage`**, encerrada automaticamente quando o token expira ou quando a API responde `401`. É uma escolha simples para uma API stateless; a alternativa mais resistente a XSS seria um cookie `httpOnly`.

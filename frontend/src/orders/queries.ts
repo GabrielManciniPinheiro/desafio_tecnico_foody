@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ordersApi } from './api'
 import type { CreateOrderRequest, Order, OrderStatus } from './types'
 
@@ -16,11 +16,16 @@ export function useOrders() {
   })
 }
 
-export function useOrder(id: number) {
-  return useQuery({
+/** Consulta de um pedido por ID, compartilhada entre a página de detalhe e a busca. */
+export function orderQuery(id: number) {
+  return queryOptions({
     queryKey: orderKeys.detail(id),
     queryFn: () => ordersApi.get(id),
   })
+}
+
+export function useOrder(id: number) {
+  return useQuery(orderQuery(id))
 }
 
 export function useCreateOrder() {
