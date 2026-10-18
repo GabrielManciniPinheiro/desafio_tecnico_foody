@@ -1,5 +1,6 @@
 package br.com.foody.shared;
 
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -29,6 +30,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, "Um ou mais campos são inválidos.");
         problem.setProperty("errors", errors);
+        return handleExceptionInternal(ex, problem, headers, status, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex,
+                                                        HttpHeaders headers,
+                                                        HttpStatusCode status,
+                                                        WebRequest request) {
+        String detail = "Valor inválido para o parâmetro '%s': %s".formatted(ex.getPropertyName(), ex.getValue());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
         return handleExceptionInternal(ex, problem, headers, status, request);
     }
 
