@@ -10,3 +10,7 @@ spring:
 app:
   jwt:
     secret: ${JWT_SECRET}
+
+server:
+  # Atrás do proxy do Render: respeita X-Forwarded-Proto/Host ao montar URLs (ex.: header Location)
+  forward-headers-strategy: native

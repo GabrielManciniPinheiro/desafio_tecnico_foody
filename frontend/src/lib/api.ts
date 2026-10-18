@@ -1,4 +1,5 @@
-const BASE_URL = import.meta.env.VITE_API_URL ?? ''
+// Remove a barra final para evitar URLs como https://api.com//api/orders
+const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '')
 
 type ProblemDetail = {
   status?: number

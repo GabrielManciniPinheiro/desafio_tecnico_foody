@@ -1,0 +1,26 @@
+# Blueprint do Render: cria a API a partir deste repositório.
+# Os valores marcados com sync: false são pedidos no painel ao criar o Blueprint.
+services:
+  - type: web
+    name: foody-api
+    runtime: docker
+    plan: free
+    # Mesma região AWS do banco no Neon (us-east-1), para reduzir a latência
+    region: virginia
+    rootDir: backend
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
