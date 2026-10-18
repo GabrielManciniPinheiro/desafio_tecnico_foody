@@ -18,3 +18,16 @@ cd backend
 ```
 
 A API sobe em `http://localhost:8080`. Para verificar: `GET /actuator/health`.
+
+### Banco de dados
+
+Por padrão a aplicação usa H2 em memória (perfil `local`), sem nenhuma configuração.
+Para usar PostgreSQL, copie `backend/.env.example` para `backend/.env`, preencha os
+dados de conexão e rode com o perfil `prod`:
+
+```bash
+./mvnw spring-boot:run "-Dspring-boot.run.profiles=prod"
+```
+
+As tabelas são criadas pelo Flyway a partir das migrations em
+`backend/src/main/resources/db/migration`.

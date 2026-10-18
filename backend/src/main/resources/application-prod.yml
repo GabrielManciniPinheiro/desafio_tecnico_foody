@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      # O plano gratuito do Neon tem limite de conexões simultâneas
+      maximum-pool-size: 5

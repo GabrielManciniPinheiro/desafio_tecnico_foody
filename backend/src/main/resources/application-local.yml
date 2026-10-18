@@ -1,0 +1,7 @@
+# Banco em memória para rodar o projeto sem nenhuma configuração.
+# Os dados são perdidos ao reiniciar a aplicação.
+spring:
+  datasource:
+    url: jdbc:h2:mem:foody;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password:
