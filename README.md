@@ -207,69 +207,6 @@ Content-Type: application/json
 
 </details>
 
-## Regras de negócio
-
-### Fluxo de status
-
-```mermaid
-stateDiagram-v2
-    [*] --> RECEBIDO
-    RECEBIDO --> EM_PREPARO
-    RECEBIDO --> CANCELADO
-    EM_PREPARO --> SAIU_PARA_ENTREGA
-    EM_PREPARO --> CANCELADO
-    SAIU_PARA_ENTREGA --> ENTREGUE
-    ENTREGUE --> [*]
-    CANCELADO --> [*]
-```
-
-- O cancelamento só é permitido antes de o pedido sair para entrega.
-- `ENTREGUE` e `CANCELADO` são status finais.
-- Uma transição fora do fluxo retorna `409 Conflict` com a explicação, por exemplo:
-  "Não é possível alterar o status do pedido de RECEBIDO para ENTREGUE."
-
-### Modelo de dados
-
-```mermaid
-erDiagram
-    users ||--o{ orders : "registra"
-    orders ||--|{ order_items : "contém"
-    order_statuses ||--o{ orders : "classifica"
-
-    users {
-        bigint id PK
-        varchar name
-        varchar email UK
-        varchar password "hash BCrypt"
-    }
-    orders {
-        bigint id PK
-        varchar customer_name
-        varchar customer_phone
-        varchar street
-        varchar number
-        varchar complement
-        varchar neighborhood
-        varchar city
-        varchar state
-        varchar zip_code
-        varchar status FK
-        numeric total_amount
-        bigint created_by FK
-        bigint version "concorrência otimista"
-    }
-    order_items {
-        bigint id PK
-        bigint order_id FK
-        varchar product_name
-        integer quantity
-        numeric unit_price
-    }
-    order_statuses {
-        varchar code PK
-    }
-```
-
 ## Decisões técnicas
 
 **Banco de dados**
