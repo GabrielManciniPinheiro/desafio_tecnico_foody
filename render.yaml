@@ -7,9 +7,10 @@ services:
     plan: free
     # Mesma região AWS do banco no Neon (us-east-1), para reduzir a latência
     region: virginia
+    # Com rootDir definido, os caminhos do Docker são relativos a ele
     rootDir: backend
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: SPRING_PROFILES_ACTIVE
