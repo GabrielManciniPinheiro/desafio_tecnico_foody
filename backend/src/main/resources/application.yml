@@ -13,6 +13,11 @@ spring:
   flyway:
     locations: classpath:db/migration
 
+app:
+  jwt:
+    issuer: foody-api
+    expiration: 8h
+
 server:
   port: ${PORT:8080}
 

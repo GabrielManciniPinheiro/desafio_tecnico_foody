@@ -23,7 +23,7 @@ A API sobe em `http://localhost:8080`. Para verificar: `GET /actuator/health`.
 
 Por padrão a aplicação usa H2 em memória (perfil `local`), sem nenhuma configuração.
 Para usar PostgreSQL, copie `backend/.env.example` para `backend/.env`, preencha os
-dados de conexão e rode com o perfil `prod`:
+dados de conexão e o segredo do JWT (`JWT_SECRET`) e rode com o perfil `prod`:
 
 ```bash
 ./mvnw spring-boot:run "-Dspring-boot.run.profiles=prod"

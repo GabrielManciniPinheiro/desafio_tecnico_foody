@@ -6,3 +6,7 @@ spring:
     hikari:
       # O plano gratuito do Neon tem limite de conexões simultâneas
       maximum-pool-size: 5
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
