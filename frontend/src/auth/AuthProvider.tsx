@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { setAuthToken, setUnauthorizedHandler } from '../lib/api'
 import { AuthContext } from './auth-context'
@@ -28,6 +29,7 @@ function loadSession(): Session | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient()
   const [session, setSession] = useState<Session | null>(() => {
     // O token precisa estar disponível antes da primeira requisição das páginas filhas
     const stored = loadSession()
@@ -50,7 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEY)
     setAuthToken(null)
     setSession(null)
-  }, [])
+    // Descarta os dados em cache para não vazarem para a próxima sessão
+    queryClient.clear()
+  }, [queryClient])
 
   useEffect(() => {
     setUnauthorizedHandler(signOut)

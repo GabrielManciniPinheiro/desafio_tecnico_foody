@@ -46,3 +46,5 @@ npm run dev
 A aplicação abre em `http://localhost:5173`. Em desenvolvimento, o Vite repassa as
 chamadas de `/api` para `http://localhost:8080`, então não é preciso configurar nada.
 Para apontar para outra API, defina `VITE_API_URL` (veja `frontend/.env.example`).
+
+Testes: `npm test` (frontend) e `./mvnw test` (backend).

@@ -2,6 +2,8 @@ import { createBrowserRouter, Navigate } from 'react-router'
 import { ProtectedRoute, PublicOnlyRoute } from './auth/ProtectedRoute'
 import { AppLayout } from './components/AppLayout'
 import { LoginPage } from './pages/LoginPage'
+import { NewOrderPage } from './pages/NewOrderPage'
+import { OrderDetailPage } from './pages/OrderDetailPage'
 import { OrdersPage } from './pages/OrdersPage'
 import { RegisterPage } from './pages/RegisterPage'
 
@@ -18,7 +20,11 @@ export const router = createBrowserRouter([
     children: [
       {
         element: <AppLayout />,
-        children: [{ path: '/', element: <OrdersPage /> }],
+        children: [
+          { path: '/', element: <OrdersPage /> },
+          { path: '/pedidos/novo', element: <NewOrderPage /> },
+          { path: '/pedidos/:id', element: <OrderDetailPage /> },
+        ],
       },
     ],
   },
